@@ -1,0 +1,184 @@
+/*
+ * Copyright (c) 2021-2023 HPMicro
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+#include "board.h"
+#include "rtt_board.h"
+#include "hpm_uart_drv.h"
+#include "hpm_gpio_drv.h"
+#include "hpm_mchtmr_drv.h"
+#include "hpm_pmp_drv.h"
+#include "assert.h"
+#include "hpm_clock_drv.h"
+#include "hpm_sysctl_drv.h"
+#include <rthw.h>
+#include <rtthread.h>
+#include "hpm_dma_mgr.h"
+#include "hpm_rtt_os_tick.h"
+#include "hpm_l1c_drv.h"
+
+extern int rt_hw_uart_init(void);
+
+void rtt_os_tick_clock(void)
+{
+#ifdef HPM_USING_VECTOR_PREEMPTED_MODE
+    clock_add_to_group(BOARD_OS_TIMER_CLK_NAME, 0);
+#else
+    clock_add_to_group(clock_mchtmr0, 0);
+#endif
+}
+
+void rtt_board_init(void)
+{
+    rtt_os_tick_clock();
+    board_init_clock();
+    board_init_console();
+    board_init_pmp();
+
+    dma_mgr_init();
+
+    /* initialize memory system */
+    rt_system_heap_init(RT_HW_HEAP_BEGIN, RT_HW_HEAP_END);
+
+    /* Configure the OS Tick */
+    os_tick_config();
+
+    /* Initialize the UART driver first, because later driver initialization may require the rt_kprintf */
+    rt_hw_uart_init();
+
+    /* Set console device */
+    rt_console_set_device(RT_CONSOLE_DEVICE_NAME);
+}
+
+void app_init_led_pins(void)
+{
+    gpio_set_pin_output(APP_LED0_GPIO_CTRL, APP_LED0_GPIO_INDEX, APP_LED0_GPIO_PIN);
+
+    gpio_write_pin(APP_LED0_GPIO_CTRL, APP_LED0_GPIO_INDEX, APP_LED0_GPIO_PIN, APP_LED_OFF);
+}
+
+void app_led_write(uint32_t index, bool state)
+{
+    switch (index)
+    {
+    case 0:
+        gpio_write_pin(APP_LED0_GPIO_CTRL, APP_LED0_GPIO_INDEX, APP_LED0_GPIO_PIN, state);
+        break;
+    default:
+        /* Suppress the toolchain warnings */
+        break;
+    }
+}
+
+void rt_hw_console_output(const char *str)
+{
+    while (*str != '\0')
+    {
+        uart_send_byte(BOARD_APP_UART_BASE, *str++);
+    }
+}
+
+void app_init_usb_pins(void)
+{
+    board_init_usb(HPM_USB0);
+}
+
+void rt_hw_cpu_reset(void)
+{
+    HPM_PPOR->RESET_ENABLE = (1UL << 31);
+    HPM_PPOR->SOFTWARE_RESET = 1000U;
+    while(1) {
+
+    }
+}
+
+MSH_CMD_EXPORT_ALIAS(rt_hw_cpu_reset, reset, reset the board);
+
+#ifdef RT_USING_CACHE
+void rt_hw_cpu_dcache_ops(int ops, void *addr, int size)
+{
+    if (ops == RT_HW_CACHE_FLUSH) {
+        l1c_dc_flush((uint32_t)addr, size);
+    } else {
+        l1c_dc_invalidate((uint32_t)addr, size);
+    }
+}
+#endif
+
+uint32_t rtt_board_init_adc16_clock(void *ptr, bool clk_src_ahb)  /* motor system should be use clk_adc_src_ahb0 */
+{
+    uint32_t freq = 0;
+
+    if (ptr == (void *)HPM_ADC0) {
+        clock_add_to_group(clock_adc0, 0);
+        if (clk_src_ahb) {
+            /* Configure the ADC clock from AHB (@200MHz by default)*/
+            clock_set_adc_source(clock_adc0, clk_adc_src_ahb0);
+        } else {
+            /* Configure the ADC clock from ANA (@200MHz by default)*/
+            clock_set_adc_source(clock_adc0, clk_adc_src_ana0);
+            clock_set_source_divider(clock_ana0, clk_src_pll1_clk0, 4U);
+        }
+        freq = clock_get_frequency(clock_adc0);
+    } else if (ptr == (void *)HPM_ADC1) {
+        clock_add_to_group(clock_adc1, 0);
+        if (clk_src_ahb) {
+            /* Configure the ADC clock from AHB (@200MHz by default)*/
+            clock_set_adc_source(clock_adc1, clk_adc_src_ahb0);
+        } else {
+            /* Configure the ADC clock from ANA (@200MHz by default)*/
+            clock_set_adc_source(clock_adc1, clk_adc_src_ana1);
+            clock_set_source_divider(clock_ana0, clk_src_pll1_clk0, 4U);
+        }
+        freq = clock_get_frequency(clock_adc1);
+    } else if (ptr == (void *)HPM_ADC2) {
+        clock_add_to_group(clock_adc2, 0);
+        if (clk_src_ahb) {
+            /* Configure the ADC clock from AHB (@200MHz by default)*/
+            clock_set_adc_source(clock_adc2, clk_adc_src_ahb0);
+        } else {
+            /* Configure the ADC clock from ANA (@200MHz by default)*/
+            clock_set_adc_source(clock_adc2, clk_adc_src_ana2);
+            clock_set_source_divider(clock_ana0, clk_src_pll1_clk0, 4U);
+        }
+        freq = clock_get_frequency(clock_adc2);
+    } else if (ptr == (void *)HPM_ADC3) {
+        clock_add_to_group(clock_adc3, 0);
+        if (clk_src_ahb) {
+            /* Configure the ADC clock from AHB (@200MHz by default)*/
+            clock_set_adc_source(clock_adc3, clk_adc_src_ahb0);
+        } else {
+            /* Configure the ADC clock from ANA (@200MHz by default)*/
+            clock_set_adc_source(clock_adc3, clk_adc_src_ana3);
+            clock_set_source_divider(clock_ana0, clk_src_pll1_clk0, 4U);
+        }
+        freq = clock_get_frequency(clock_adc3);
+    } else {
+        ;
+    }
+
+    return freq;
+}
+
+uint32_t rtt_board_init_pwm_clock(PWMV2_Type *ptr)
+{
+    uint32_t freq = 0;
+    if (ptr == HPM_PWM0) {
+        clock_add_to_group(clock_pwm0, 0);
+        freq = clock_get_frequency(clock_pwm0);
+    } else if (ptr == HPM_PWM1) {
+        clock_add_to_group(clock_pwm1, 0);
+        freq = clock_get_frequency(clock_pwm1);
+    } else if (ptr == HPM_PWM2) {
+        clock_add_to_group(clock_pwm2, 0);
+        freq = clock_get_frequency(clock_pwm2);
+    } else if (ptr == HPM_PWM3) {
+        clock_add_to_group(clock_pwm3, 0);
+        freq = clock_get_frequency(clock_pwm3);
+    } else {
+
+    }
+    return freq;
+}
