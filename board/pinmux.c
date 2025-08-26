@@ -103,7 +103,7 @@ void init_femc_pins(void)
     HPM_IOC->PAD[IOC_PAD_PC11].FUNC_CTL = IOC_PC11_FUNC_CTL_FEMC_DQ_15;
 
     /* Improve DQ pins driver strength */
-    pad_ctl = IOC_PAD_PAD_CTL_SR_SET(1) | IOC_PAD_PAD_CTL_SPD_SET(3) | IOC_PAD_PAD_CTL_DS_SET(6);
+    pad_ctl = IOC_PAD_PAD_CTL_SR_SET(1) | IOC_PAD_PAD_CTL_SPD_SET(3) | IOC_PAD_PAD_CTL_DS_SET(4);
     HPM_IOC->PAD[IOC_PAD_PC12].PAD_CTL = pad_ctl;
     HPM_IOC->PAD[IOC_PAD_PC13].PAD_CTL = pad_ctl;
     HPM_IOC->PAD[IOC_PAD_PC14].PAD_CTL = pad_ctl;

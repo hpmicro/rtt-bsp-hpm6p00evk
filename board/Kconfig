@@ -11,6 +11,12 @@ config BSP_USING_ENET_PHY_RTL8211
     bool
     default n
 
+if BSP_USING_ETH
+    config LWIP_SUPPORT_CUSTOM_PBUF
+    int
+    default 1
+endif
+
 menu "On-chip Peripheral Drivers"
     config BSP_USING_GPIO
         bool "Enable GPIO"
@@ -379,6 +385,8 @@ menu "On-chip Peripheral Drivers"
        default n
 
        select RT_USING_ETH if BSP_USING_ETH
+       select RT_USING_PHY if BSP_USING_ETH
+
        if BSP_USING_ETH
            choice
                prompt "ETH"
@@ -524,6 +532,7 @@ menu "On-chip Peripheral Drivers"
        if BSP_USING_USB
             config BSP_USING_USB_DEVICE
                 bool "Enable USB Device"
+                select RT_USING_CACHE
                 default n
             config BSP_USING_USB_HOST
                 bool "Enable USB Host"
@@ -544,7 +553,7 @@ menu "On-chip Peripheral Drivers"
                 bool "Enable EWDG1"
                 default n
         endif
-    
+
     menuconfig BSP_USING_PWMV2
         bool "Enable PWM"
         default n
@@ -598,10 +607,10 @@ menu "On-chip Peripheral Drivers"
         default n
         select RT_USING_ADC if BSP_USING_ADC
         if BSP_USING_ADC
-            menuconfig BSP_USING_ADC12
-                bool "Enable ADC12"
+            menuconfig BSP_USING_ADC16
+                bool "Enable ADC16"
                 default n
-                if BSP_USING_ADC12
+                if BSP_USING_ADC16
                     config BSP_USING_ADC0
                         bool "Enable ADC0"
                         default n
@@ -611,13 +620,8 @@ menu "On-chip Peripheral Drivers"
                     config BSP_USING_ADC2
                         bool "Enable ADC2"
                         default n
-                    endif
-            menuconfig BSP_USING_ADC16
-                bool "Enable ADC16"
-                default n
-                if BSP_USING_ADC16
-                    config BSP_USING_ADC0
-                        bool "Enable ADC0"
+                    config BSP_USING_ADC3
+                        bool "Enable ADC3"
                         default n
                 endif
          endif
