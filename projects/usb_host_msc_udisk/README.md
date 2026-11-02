@@ -2,25 +2,25 @@
 
 ## 概述
 
-本示例工程展示rtthread DFS文件系统挂载U盘进行访问操作
+本示例工程展示RT-Thread DFS文件系统挂载U盘进行访问操作
 
 - DFS文件系统挂载U盘成功后，可以使用文件操作命令操作U盘
 
 ## 硬件设置
 
 - 使用USB Type-C线缆连接PC USB端口和PWR DEBUG端口
-- 使用USB Type-C转USB-A线缆连接U 盘和开发板USB0端口或者USB1端口
+- 使用USB Type-C转USB-A线缆连接U 盘和开发板USB0端口
 
 ## 注意
 
-* 需要把JP8和JP9的短接帽断开，才可使用USB功能
+- 需要把JP8和JP9的短接帽断开，才可使用USB功能
 
 ## 运行示例
 
 当工程正确运行后
 
-* 编译下载程序, 并插入U盘
-* 串口终端显示U盘挂载成功
+- 编译下载程序， 并插入U盘
+- 串口终端显示U盘挂载成功
 
 ```console
  \ | /
@@ -74,7 +74,7 @@ date             - get date and time or set (local timezone) [year month day hou
 
 ```
 
-* 使用ls命令查看显示当前目录下的文件和文件夹
+- 使用ls命令查看显示当前目录下的文件和文件夹
 
 ```console
 msh />ls
@@ -85,14 +85,14 @@ hpmicro.txt         7
 
 ```
 
-* 使用echo命令将指定内容写入指定文件，当文件存在时，就写入该文件，当文件不存在时就创建新的文件并且写入
+- 使用echo命令将指定内容写入指定文件，当文件存在时，就写入该文件，当文件不存在时就创建新的文件并且写入
 ```console
 
 msh />echo "hpmicro cherryusb" usb.txt
 
 ```
 
-* 使用cat展示文件内容
+- 使用cat展示文件内容
 
 ```console
 
